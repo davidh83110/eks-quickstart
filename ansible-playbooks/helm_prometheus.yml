@@ -1,0 +1,31 @@
+---
+
+- name: Install Prometheus by Helm on EKS Cluster
+  hosts: localhost
+  
+  tasks:
+    ## It might be failed when you're trying to create the same namespace over once.
+    - name: "Create Namespace"
+      shell: "kubectl create namespace prometheus"
+      register: "namespace"
+      ignore_errors: yes
+  
+    - name: "Helm Repo Add"
+      shell: "helm repo add stable https://kubernetes-charts.storage.googleapis.com/"
+      register: "helm_add"
+
+    - name: "Helm Install Prometheus"
+      shell: "helm install prometheus stable/prometheus \
+            --namespace prometheus \
+            --set alertmanager.persistentVolume.storageClass=\"gp2\",server.persistentVolume.storageClass=\"gp2\""
+      register: "helm_prometheus"
+      ignore_errors: yes
+  
+  
+    - name: "Check Installation Status"
+      shell: "kubectl get pods -n prometheus"
+      register: "get_pods"
+  
+  
+    - name: "Show outputs"
+      debug: msg="{{ namespace.stdout_lines }} {{ helm_add.stdout_lines }} {{ helm_prometheus.stdout_lines }} {{ get_pods.stdout_lines }}"

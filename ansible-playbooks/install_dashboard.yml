@@ -1,0 +1,15 @@
+---
+### TODO: Apply an ALB-Ingress for Dashboard.
+
+- name: Install kubernetes Dashboard on EKS Cluster
+  hosts: localhost
+
+  tasks:
+    - name: "Download and Apply kubernetes-dashboard to EKS Cluster"
+      shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml"
+      register: "output"
+
+
+    - name: "Show outputs"
+      debug: msg="{{ output.stdout_lines }}"
+

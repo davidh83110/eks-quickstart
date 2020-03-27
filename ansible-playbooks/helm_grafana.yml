@@ -1,0 +1,67 @@
+---
+##
+# "Service init failed: Datasource provisioning error: read /etc/grafana/provisioning/datasources/datasources.yaml: is a directory"
+# 
+# If you are encountering this pod initiation failed issue, that's because format and naming issue, it will automatically create a directory and pod will keep crashing.
+# "--set datasource" this option has some issue obviously. What we can do is assign datasources.yml this file manually.
+# Reference: https://github.com/helm/charts/issues/6728
+#
+# For this playbook, I will store datasource.yaml on templates directory and override some arguments on this helm chart.
+#
+# Grafana Helm Chart Repo: https://github.com/helm/charts/blob/master/stable/grafana/values.yaml
+#
+
+
+- name: Install Grafana by Helm on EKS Cluster
+  hosts: localhost
+  
+  tasks:
+    ## It might be failed when you're trying to create the same namespace over once.
+    - name: "Create Namespace"
+      shell: "kubectl create namespace grafana"
+      register: "namespace"
+      ignore_errors: yes
+  
+    - name: "Helm Repo Add"
+      shell: "helm repo add stable https://kubernetes-charts.storage.googleapis.com/"
+      register: "helm_add"
+
+    - name: "Render YAML"
+      template:
+        src: templates/helm_grafana_values.yaml.j2
+        dest: /tmp/helm_grafana_values.yaml
+
+    - name: "Helm Install Grafana"
+      shell: "helm install grafana stable/grafana \
+          --namespace grafana \
+          -f /tmp/helm_grafana_values.yaml"
+      register: "helm_grafana"
+      ignore_errors: yes
+
+    - name: "Render Ingress YAML"
+      template:
+        src: templates/grafana_alb_ingress.yaml.j2
+        dest: /tmp/grafana_alb_ingress.yaml
+
+    - name: "Create Grafana ALB Ingress"
+      shell: " kubectl apply -f /tmp/grafana_alb_ingress.yaml"
+      register: "grafana_ingress"
+  
+    - name: "Check Installation Status"
+      shell: "kubectl get all -n grafana"
+      register: "get_status"
+
+    ## If this command doesn't output the URL, please run this command manually.
+    - name: "Get Grafana ELB Endpoint URL"
+      shell: "export ELB=$(kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') && \
+              echo \"http://$ELB\""
+      register: "grafana_url"
+
+    ## Username is "admin" by default
+    - name: "Get Grafana Password from Secret"
+      shell: "kubectl get secret --namespace grafana grafana -o jsonpath=\"{.data.admin-password}\" | base64 --decode ; echo"
+      register: "grafana_password"
+  
+  
+    - name: "Show outputs"
+      debug: msg="{{ namespace.stdout_lines }} {{ helm_add.stdout_lines }} {{ helm_grafana.stdout_lines }} {{ grafana_ingress.stdout_lines }} {{ get_status.stdout_lines }} {{ grafana_url.stdout_lines }} {{ grafana_password.stdout_lines }}"

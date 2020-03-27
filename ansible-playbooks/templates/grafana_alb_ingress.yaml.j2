@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "grafana-ingress"
+  namespace: "grafana"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/security-groups: "sg-059278dd19dba9ba8"
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+  labels:
+    app: grafana
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: "grafana"
+              servicePort: 80

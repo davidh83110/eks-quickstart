@@ -1,0 +1,26 @@
+---
+## https://docs.aws.amazon.com/zh_tw/eks/latest/userguide/cluster-autoscaler.html
+## Only for v1.15.x Kubernetes.
+
+- name: Install Cluster Autoscaler on EKS Cluster
+  hosts: localhost
+
+  tasks:
+    - name: "Render YAML"
+      template:
+        src: templates/cluster-autoscaler-v1.15.5.yaml.j2
+        dest: /tmp/cluster-autoscaler-v1.15.5.yaml
+      vars:
+        cluster_name: development
+
+    - name: "Apply to EKS Cluster"
+      shell: "kubectl apply -f /tmp/cluster-autoscaler-v1.15.5.yaml"
+      register: "apply"
+
+    - name: "Set Safe to Evict on Cluster Autoscaler"
+      shell: "kubectl -n kube-system annotate deployment.apps/cluster-autoscaler cluster-autoscaler.kubernetes.io/safe-to-evict=\"false\""
+      register: "annotate"
+
+
+    - name: "Show outputs"
+      debug: msg="{{ apply.stdout_lines }}\n{{ annotate.stdout_lines }}"

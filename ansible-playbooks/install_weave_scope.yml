@@ -1,0 +1,21 @@
+---
+
+- name: Install Weave-Scope to EKS
+  hosts: localhost
+
+  tasks:
+     - name: "Apply Weave-Scope to EKS Cluster"
+       shell: "kubectl apply -f https://cloud.weave.works/k8s/scope.yaml?k8s-version=1.15"
+       register: "weave_scope"
+
+     - name: "Render YAML"
+       template:
+         src: templates/weave_scope_ingress.yaml.j2
+         dest: /tmp/weave_scope_ingress.yaml
+
+     - name: "Apply ALB Ingress for Weave-Scope"
+       shell: "kubectl apply -f /tmp/weave_scope_ingress.yaml"
+       register: "weave_ingress"
+  
+     - name: "Show outputs"
+       debug: msg=" {{ weave_ingress.stdout_lines }}"
