@@ -102,6 +102,14 @@
       {
         "Effect": "Allow",
         "Action": [
+          "wafv2:GetWebACLForResource",
+          "wafv2:GetWebACL"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
           "tag:GetResources",
           "tag:TagResources"
         ],
