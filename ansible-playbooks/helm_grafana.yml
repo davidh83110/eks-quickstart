@@ -46,16 +46,6 @@
     - name: "Create Grafana ALB Ingress"
       shell: " kubectl apply -f /tmp/grafana_alb_ingress.yaml"
       register: "grafana_ingress"
-  
-    - name: "Check Installation Status"
-      shell: "kubectl get all -n grafana"
-      register: "get_status"
-
-    ## If this command doesn't output the URL, please run this command manually.
-    - name: "Get Grafana ELB Endpoint URL"
-      shell: "export ELB=$(kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') && \
-              echo \"http://$ELB\""
-      register: "grafana_url"
 
     ## Username is "admin" by default
     - name: "Get Grafana Password from Secret"
@@ -64,4 +54,4 @@
   
   
     - name: "Show outputs"
-      debug: msg="{{ namespace.stdout_lines }} {{ helm_add.stdout_lines }} {{ helm_grafana.stdout_lines }} {{ grafana_ingress.stdout_lines }} {{ get_status.stdout_lines }} {{ grafana_url.stdout_lines }} {{ grafana_password.stdout_lines }}"
+      debug: msg="{{ namespace.stdout_lines }} {{ helm_add.stdout_lines }} {{ helm_grafana.stdout_lines }} {{ grafana_ingress.stdout_lines }} {{ grafana_password.stdout_lines }}"
