@@ -54,3 +54,5 @@ variable "node_group_depends_on" {
 variable "node_tags" {
     type = map
 }
+
+variable "labels" {}

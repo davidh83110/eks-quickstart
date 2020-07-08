@@ -30,6 +30,7 @@ resource "aws_eks_node_group" "worker" {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }, var.node_tags)
 
+  labels = var.labels
 
   lifecycle {
     create_before_destroy = true
