@@ -41,39 +41,60 @@ resource "aws_security_group_rule" "master_ingress_vpc" {
 }
 
 
-
-## ============================== Nodes ======================================
-resource "aws_security_group" "nodes" {
-  name        = "${var.cluster_name}-EKS-Nodes-SG"
-  description = "Security Group for EKS Node Instances"
+## ============================== Worker Node ======================================
+resource "aws_security_group" "worker" {
+  name        = "${var.cluster_name}-EKS-Node-SG"
+  description = "Security Group for EKS cluster Worker Node"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   tags        = {
-    Name = "${var.cluster_name}-eks-nodes-sg"
+    Name = "${var.cluster_name}-eks-node-sg"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }
 }
 
 ## ====Outbound====
 ## Outbound allows all
-resource "aws_security_group_rule" "nodes_egress" {
+resource "aws_security_group_rule" "node_egress" {
   description       = "Allow all egress traffic"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.nodes.id
+  security_group_id = aws_security_group.worker.id
   type              = "egress"
 }
 
 
 ## ====Inbound====
 ## Inbound allows for whole VPC
-resource "aws_security_group_rule" "nodes_ingress_vpc" {
-  description              = "Allow the cluster to receive communication from all internal traffic"
+resource "aws_security_group_rule" "node_ingress_vpc" {
+  description              = "Allow internal traffic"
   from_port                = 0
   to_port                  = 65535
   protocol                 = "-1"
   cidr_blocks              = [data.terraform_remote_state.vpc.outputs.vpc_cidr]
-  security_group_id        = aws_security_group.nodes.id
+  security_group_id        = aws_security_group.worker.id
+  type                     = "ingress"
+}
+
+## Inbound allows for office
+resource "aws_security_group_rule" "node_ingress_office" {
+  description              = "Allow office traffic"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "-1"
+  cidr_blocks              = ["61.11.11.11/32"]
+  security_group_id        = aws_security_group.worker.id
+  type                     = "ingress"
+}
+
+## Inbound allows for whole VPC
+resource "aws_security_group_rule" "node_ingress_alb_sg" {
+  description              = "Allow ALB SG traffic"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "-1"
+  source_security_group_id = "sg-04d76c9c0063edec3"
+  security_group_id        = aws_security_group.worker.id
   type                     = "ingress"
 }

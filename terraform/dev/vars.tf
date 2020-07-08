@@ -27,8 +27,16 @@ variable "public_access_cidrs" {
     description = "White list for which CIDR can public access this cluster"
 }
 
+variable "node_key_pair" {}
+
 variable "node_desired_capacity" {}
 variable "node_max_capacity" {}
 variable "node_min_capacity" {}
 variable "node_disk_size" {}
 variable "node_instance_type" {}
+
+variable "node_app_desired_capacity" {}
+variable "node_app_max_capacity" {}
+variable "node_app_min_capacity" {}
+variable "node_app_disk_size" {}
+variable "node_app_instance_type" {}

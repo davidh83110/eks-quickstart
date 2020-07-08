@@ -15,7 +15,6 @@ resource "aws_iam_openid_connect_provider" "oidc_provider" {
   # it's thumbprint won't change for many years :)
   # https://github.com/terraform-providers/terraform-provider-aws/issues/10104
   thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
-
   url             = aws_eks_cluster.main.identity.0.oidc.0.issuer
 }
 

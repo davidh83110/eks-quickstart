@@ -8,7 +8,12 @@ resource "aws_eks_cluster" "main" {
 
   vpc_config {
     security_group_ids      = [ aws_security_group.master.id, data.terraform_remote_state.vpc.outputs.office_sg_id ]
-    subnet_ids              = [ data.terraform_remote_state.vpc.outputs.subnet_app_a_id, data.terraform_remote_state.vpc.outputs.subnet_app_b_id ]
+    subnet_ids              = [
+      data.terraform_remote_state.vpc.outputs.subnet_public_a_id,
+      data.terraform_remote_state.vpc.outputs.subnet_public_b_id,
+      data.terraform_remote_state.vpc.outputs.subnet_app_a_id,
+      data.terraform_remote_state.vpc.outputs.subnet_app_b_id
+    ]
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs

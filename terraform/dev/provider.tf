@@ -5,8 +5,8 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "xxxxxxxxx"
-    key    = "eks/terraform.tfstate"
+    bucket = "terraform-xrex-dev"
+    key    = "exchange-eks/terraform.tfstate"
     region = "ap-northeast-1"
   }
 }
@@ -16,8 +16,8 @@ data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config = {
-    bucket = "xxxxxxx"
-    key    = "vpc/terraform.tfstate"
+    bucket = "terraform-xrex-dev"
+    key    = "exchange-vpc/terraform.tfstate"
     region = "ap-northeast-1"
   }
 }
